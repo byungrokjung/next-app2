@@ -18,18 +18,12 @@ export interface ApiKeyUpdateData {
   limit?: number | null;
 }
 
-interface RouteContext {
-  params: {
-    id: string;
-  };
-}
-
 export async function PATCH(
-  request: NextRequest,
-  context: RouteContext
-): Promise<NextResponse> {
-  if (!context.params.id) {
-    return NextResponse.json(
+  request: Request,
+  { params }: { params: { id: string } }
+): Promise<Response> {
+  if (!params.id) {
+    return Response.json(
       { error: 'Missing ID parameter' },
       { status: 400 }
     );
@@ -47,20 +41,20 @@ export async function PATCH(
     const { data, error } = await supabase
       .from('api_keys')
       .update(updates)
-      .eq('id', context.params.id)
+      .eq('id', params.id)
       .select()
       .single();
 
     if (error) {
-      return NextResponse.json(
+      return Response.json(
         { error: error.message },
         { status: 500 }
       );
     }
 
-    return NextResponse.json(data);
+    return Response.json(data);
   } catch (err) {
-    return NextResponse.json(
+    return Response.json(
       { error: 'Internal Server Error' },
       { status: 500 }
     );
@@ -68,11 +62,11 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: NextRequest,
-  context: RouteContext
-): Promise<NextResponse> {
-  if (!context.params.id) {
-    return NextResponse.json(
+  request: Request,
+  { params }: { params: { id: string } }
+): Promise<Response> {
+  if (!params.id) {
+    return Response.json(
       { error: 'Missing ID parameter' },
       { status: 400 }
     );
@@ -82,18 +76,18 @@ export async function DELETE(
     const { error } = await supabase
       .from('api_keys')
       .delete()
-      .eq('id', context.params.id);
+      .eq('id', params.id);
 
     if (error) {
-      return NextResponse.json(
+      return Response.json(
         { error: error.message },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ success: true });
+    return Response.json({ success: true });
   } catch (err) {
-    return NextResponse.json(
+    return Response.json(
       { error: 'Internal Server Error' },
       { status: 500 }
     );
