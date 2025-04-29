@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '../../../../lib/supabaseClient';
 
 interface ApiKey {
@@ -12,10 +12,10 @@ interface ApiKey {
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: { id: string } }
 ) {
-  const { id } = params;
+  const { id } = context.params;
   const { error } = await supabase
     .from('api_keys')
     .delete()
@@ -28,7 +28,7 @@ export async function DELETE(
 
 /** PUT: API 키 정보 수정 */
 export async function PUT(
-  request: Request,
+  request: NextRequest,
   context: { params: { id: string } }
 ) {
   const { id } = context.params;
