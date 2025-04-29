@@ -29,9 +29,9 @@ export async function DELETE(
 /** PUT: API 키 정보 수정 */
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
-  const { id } = params;
+  const { id } = context.params;
   const { name, type, limit_enabled, limitEnabled, limit } = await request.json();
   const updates: Partial<ApiKey> = {};
   if (name) updates.name = name;
