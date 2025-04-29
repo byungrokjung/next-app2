@@ -18,9 +18,15 @@ export interface ApiKeyUpdateData {
   limit?: number | null;
 }
 
+interface RouteContext {
+  params: {
+    id: string;
+  };
+}
+
 export async function PATCH(
   request: NextRequest,
-  context: { params: { id: string } }
+  context: RouteContext
 ): Promise<NextResponse> {
   if (!context.params.id) {
     return NextResponse.json(
@@ -63,7 +69,7 @@ export async function PATCH(
 
 export async function DELETE(
   _request: NextRequest,
-  context: { params: { id: string } }
+  context: RouteContext
 ): Promise<NextResponse> {
   if (!context.params.id) {
     return NextResponse.json(
