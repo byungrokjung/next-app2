@@ -11,42 +11,52 @@ interface ApiKey {
   limit: number | null;
 }
 
+type Params = { id: string };
+
 export async function DELETE(
   request: Request,
-  context: { params: { id: string } }
+  { params }: { params: Params }
 ) {
-  const { id } = context.params;
-  const { error } = await supabase
-    .from('api_keys')
-    .delete()
-    .eq('id', id);
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  try {
+    const { id } = params;
+    const { error } = await supabase
+      .from('api_keys')
+      .delete()
+      .eq('id', id);
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
-  return NextResponse.json({ success: true });
 }
 
 /** PATCH: API 키 정보 수정 */
 export async function PATCH(
   request: Request,
-  context: { params: { id: string } }
+  { params }: { params: Params }
 ) {
-  const { id } = context.params;
-  const { name, type, limit_enabled, limitEnabled, limit } = await request.json();
-  const updates: Partial<ApiKey> = {};
-  if (name) updates.name = name;
-  if (type) updates.type = type;
-  updates.limit_enabled = !!(limit_enabled || limitEnabled);
-  updates.limit = (limit_enabled || limitEnabled) ? limit : null;
+  try {
+    const { id } = params;
+    const { name, type, limit_enabled, limitEnabled, limit } = await request.json();
+    const updates: Partial<ApiKey> = {};
+    if (name) updates.name = name;
+    if (type) updates.type = type;
+    updates.limit_enabled = !!(limit_enabled || limitEnabled);
+    updates.limit = (limit_enabled || limitEnabled) ? limit : null;
 
-  const { data, error } = await supabase
-    .from('api_keys')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single();
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const { data, error } = await supabase
+      .from('api_keys')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json(data);
+  } catch (err) {
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
-  return NextResponse.json(data);
 } 
