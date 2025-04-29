@@ -11,16 +11,10 @@ interface ApiKey {
   limit: number | null;
 }
 
-interface RouteContext {
-  params: {
-    id: string;
-  };
-}
-
 export async function DELETE(
-  req: NextRequest,
+  request: Request,
   { params }: { params: { id: string } }
-): Promise<NextResponse> {
+) {
   const { id } = params;
   const { error } = await supabase
     .from('api_keys')
@@ -34,11 +28,11 @@ export async function DELETE(
 
 /** PATCH: API 키 정보 수정 */
 export async function PATCH(
-  req: NextRequest,
+  request: Request,
   { params }: { params: { id: string } }
-): Promise<NextResponse> {
+) {
   const { id } = params;
-  const { name, type, limit_enabled, limitEnabled, limit } = await req.json();
+  const { name, type, limit_enabled, limitEnabled, limit } = await request.json();
   const updates: Partial<ApiKey> = {};
   if (name) updates.name = name;
   if (type) updates.type = type;
