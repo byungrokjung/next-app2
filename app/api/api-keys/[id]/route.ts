@@ -11,6 +11,12 @@ interface ApiKey {
   limit: number | null;
 }
 
+interface RouteContext {
+  params: {
+    id: string;
+  };
+}
+
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -26,8 +32,8 @@ export async function DELETE(
   return NextResponse.json({ success: true });
 }
 
-/** PUT: API 키 정보 수정 */
-export async function PUT(
+/** PATCH: API 키 정보 수정 */
+export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse> {

@@ -99,7 +99,7 @@ export default function ApiKeysPage() {
     if (!editName.trim()) { alert('키 이름을 입력해주세요.'); return; }
     try {
       const res = await fetch(`/api/api-keys/${editingKey.id}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: editName, type: editType, limit_enabled: editLimitEnabled, limit: editLimit }),
       });
