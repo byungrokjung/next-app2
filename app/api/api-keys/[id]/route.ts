@@ -18,16 +18,12 @@ export interface ApiKeyUpdateData {
   limit?: number | null;
 }
 
-export async function PATCH(request: Request) {
-  const id = request.url.split('/').pop();
-  if (!id) {
-    return NextResponse.json(
-      { error: 'Missing ID parameter' },
-      { status: 400 }
-    );
-  }
-
+export async function PATCH(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
+    const id = params.id;
     const body = await request.json();
     const updates: ApiKeyUpdateData = {};
 
@@ -59,16 +55,12 @@ export async function PATCH(request: Request) {
   }
 }
 
-export async function DELETE(request: Request) {
-  const id = request.url.split('/').pop();
-  if (!id) {
-    return NextResponse.json(
-      { error: 'Missing ID parameter' },
-      { status: 400 }
-    );
-  }
-
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
+    const id = params.id;
     const { error } = await supabase
       .from('api_keys')
       .delete()
