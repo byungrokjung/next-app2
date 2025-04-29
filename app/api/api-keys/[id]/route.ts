@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '../../../../lib/supabaseClient';
 
 interface ApiKey {
@@ -11,11 +11,9 @@ interface ApiKey {
   limit: number | null;
 }
 
-type Params = { id: string };
-
 export async function DELETE(
-  request: Request,
-  { params }: { params: Params }
+  _req: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
     const { id } = params;
@@ -34,12 +32,12 @@ export async function DELETE(
 
 /** PATCH: API 키 정보 수정 */
 export async function PATCH(
-  request: Request,
-  { params }: { params: Params }
+  req: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
     const { id } = params;
-    const { name, type, limit_enabled, limitEnabled, limit } = await request.json();
+    const { name, type, limit_enabled, limitEnabled, limit } = await req.json();
     const updates: Partial<ApiKey> = {};
     if (name) updates.name = name;
     if (type) updates.type = type;
