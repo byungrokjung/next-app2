@@ -18,19 +18,17 @@ export interface ApiKeyUpdateData {
   limit?: number | null;
 }
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
-  if (!params.id) {
-    return new NextResponse(
-      JSON.stringify({ error: 'Missing ID parameter' }),
+export async function PATCH(request: Request) {
+  const id = request.url.split('/').pop();
+  if (!id) {
+    return NextResponse.json(
+      { error: 'Missing ID parameter' },
       { status: 400 }
     );
   }
 
   try {
-    const body = await req.json();
+    const body = await request.json();
     const updates: ApiKeyUpdateData = {};
 
     if (body.name) updates.name = body.name;
@@ -41,33 +39,31 @@ export async function PATCH(
     const { data, error } = await supabase
       .from('api_keys')
       .update(updates)
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single();
 
     if (error) {
-      return new NextResponse(
-        JSON.stringify({ error: error.message }),
+      return NextResponse.json(
+        { error: error.message },
         { status: 500 }
       );
     }
 
-    return new NextResponse(JSON.stringify(data));
+    return NextResponse.json(data);
   } catch (err) {
-    return new NextResponse(
-      JSON.stringify({ error: 'Internal Server Error' }),
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
       { status: 500 }
     );
   }
 }
 
-export async function DELETE(
-  _req: Request,
-  { params }: { params: { id: string } }
-) {
-  if (!params.id) {
-    return new NextResponse(
-      JSON.stringify({ error: 'Missing ID parameter' }),
+export async function DELETE(request: Request) {
+  const id = request.url.split('/').pop();
+  if (!id) {
+    return NextResponse.json(
+      { error: 'Missing ID parameter' },
       { status: 400 }
     );
   }
@@ -76,19 +72,19 @@ export async function DELETE(
     const { error } = await supabase
       .from('api_keys')
       .delete()
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (error) {
-      return new NextResponse(
-        JSON.stringify({ error: error.message }),
+      return NextResponse.json(
+        { error: error.message },
         { status: 500 }
       );
     }
 
-    return new NextResponse(JSON.stringify({ success: true }));
+    return NextResponse.json({ success: true });
   } catch (err) {
-    return new NextResponse(
-      JSON.stringify({ error: 'Internal Server Error' }),
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
       { status: 500 }
     );
   }
