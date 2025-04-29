@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { supabase } from '../../../../lib/supabaseClient';
 
-interface ApiKey {
+export interface ApiKey {
   id: string;
   name: string;
   key: string;
@@ -11,50 +12,85 @@ interface ApiKey {
   limit: number | null;
 }
 
-export async function DELETE(
-  _req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const { id } = params;
-    const { error } = await supabase
-      .from('api_keys')
-      .delete()
-      .eq('id', id);
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-    return NextResponse.json({ success: true });
-  } catch (err) {
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
-  }
+export interface ApiKeyUpdateData {
+  name?: string;
+  type?: 'production' | 'development';
+  limit_enabled?: boolean;
+  limit?: number | null;
 }
 
-/** PATCH: API 키 정보 수정 */
 export async function PATCH(
-  req: NextRequest,
+  request: NextRequest,
   { params }: { params: { id: string } }
-) {
+): Promise<NextResponse> {
+  if (!params.id) {
+    return NextResponse.json(
+      { error: 'Missing ID parameter' },
+      { status: 400 }
+    );
+  }
+
   try {
-    const { id } = params;
-    const { name, type, limit_enabled, limitEnabled, limit } = await req.json();
-    const updates: Partial<ApiKey> = {};
-    if (name) updates.name = name;
-    if (type) updates.type = type;
-    updates.limit_enabled = !!(limit_enabled || limitEnabled);
-    updates.limit = (limit_enabled || limitEnabled) ? limit : null;
+    const body = await request.json();
+    const updates: ApiKeyUpdateData = {};
+
+    if (body.name) updates.name = body.name;
+    if (body.type) updates.type = body.type;
+    if ('limit_enabled' in body) updates.limit_enabled = !!body.limit_enabled;
+    if ('limit' in body) updates.limit = body.limit;
 
     const { data, error } = await supabase
       .from('api_keys')
       .update(updates)
-      .eq('id', id)
+      .eq('id', params.id)
       .select()
       .single();
+
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500 }
+      );
     }
+
     return NextResponse.json(data);
   } catch (err) {
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: { id: string } }
+): Promise<NextResponse> {
+  if (!params.id) {
+    return NextResponse.json(
+      { error: 'Missing ID parameter' },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const { error } = await supabase
+      .from('api_keys')
+      .delete()
+      .eq('id', params.id);
+
+    if (error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    );
   }
 } 
