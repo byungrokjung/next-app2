@@ -20,9 +20,9 @@ export interface ApiKeyUpdateData {
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ): Promise<NextResponse> {
-  if (!params.id) {
+  if (!context.params.id) {
     return NextResponse.json(
       { error: 'Missing ID parameter' },
       { status: 400 }
@@ -41,7 +41,7 @@ export async function PATCH(
     const { data, error } = await supabase
       .from('api_keys')
       .update(updates)
-      .eq('id', params.id)
+      .eq('id', context.params.id)
       .select()
       .single();
 
@@ -63,9 +63,9 @@ export async function PATCH(
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ): Promise<NextResponse> {
-  if (!params.id) {
+  if (!context.params.id) {
     return NextResponse.json(
       { error: 'Missing ID parameter' },
       { status: 400 }
@@ -76,7 +76,7 @@ export async function DELETE(
     const { error } = await supabase
       .from('api_keys')
       .delete()
-      .eq('id', params.id);
+      .eq('id', context.params.id);
 
     if (error) {
       return NextResponse.json(
