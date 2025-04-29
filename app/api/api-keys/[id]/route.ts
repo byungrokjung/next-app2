@@ -18,19 +18,12 @@ export interface ApiKeyUpdateData {
   limit?: number | null;
 }
 
-type RouteParams = {
-  params: {
-    id: string;
-  };
-};
-
 export async function PATCH(
-  request: Request,
-  { params }: RouteParams
-) {
+  req: Request,
+  { params }: { params: { id: string } }
+): Promise<Response> {
   try {
-    const { id } = params;
-    const body = await request.json();
+    const body = await req.json();
     const updates: ApiKeyUpdateData = {};
 
     if (body.name) updates.name = body.name;
@@ -41,20 +34,20 @@ export async function PATCH(
     const { data, error } = await supabase
       .from('api_keys')
       .update(updates)
-      .eq('id', id)
+      .eq('id', params.id)
       .select()
       .single();
 
     if (error) {
-      return NextResponse.json(
+      return Response.json(
         { error: error.message },
         { status: 500 }
       );
     }
 
-    return NextResponse.json(data);
+    return Response.json(data);
   } catch (err) {
-    return NextResponse.json(
+    return Response.json(
       { error: 'Internal Server Error' },
       { status: 500 }
     );
@@ -62,26 +55,25 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: RouteParams
-) {
+  req: Request,
+  { params }: { params: { id: string } }
+): Promise<Response> {
   try {
-    const { id } = params;
     const { error } = await supabase
       .from('api_keys')
       .delete()
-      .eq('id', id);
+      .eq('id', params.id);
 
     if (error) {
-      return NextResponse.json(
+      return Response.json(
         { error: error.message },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ success: true });
+    return Response.json({ success: true });
   } catch (err) {
-    return NextResponse.json(
+    return Response.json(
       { error: 'Internal Server Error' },
       { status: 500 }
     );
