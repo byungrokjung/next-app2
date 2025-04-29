@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { supabase } from '../../../../lib/supabaseClient';
 
 export interface ApiKey {
@@ -18,12 +18,10 @@ export interface ApiKeyUpdateData {
   limit?: number | null;
 }
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
-): Promise<Response> {
+export async function PATCH(request: NextRequest) {
   try {
-    const body = await req.json();
+    const id = request.url.split('/').pop();
+    const body = await request.json();
     const updates: ApiKeyUpdateData = {};
 
     if (body.name) updates.name = body.name;
@@ -34,48 +32,70 @@ export async function PATCH(
     const { data, error } = await supabase
       .from('api_keys')
       .update(updates)
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single();
 
     if (error) {
-      return Response.json(
-        { error: error.message },
-        { status: 500 }
+      return new Response(
+        JSON.stringify({ error: error.message }),
+        { 
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        }
       );
     }
 
-    return Response.json(data);
+    return new Response(
+      JSON.stringify(data),
+      { 
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
   } catch (err) {
-    return Response.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
+    return new Response(
+      JSON.stringify({ error: 'Internal Server Error' }),
+      { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      }
     );
   }
 }
 
-export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
-): Promise<Response> {
+export async function DELETE(request: NextRequest) {
   try {
+    const id = request.url.split('/').pop();
     const { error } = await supabase
       .from('api_keys')
       .delete()
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (error) {
-      return Response.json(
-        { error: error.message },
-        { status: 500 }
+      return new Response(
+        JSON.stringify({ error: error.message }),
+        { 
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        }
       );
     }
 
-    return Response.json({ success: true });
+    return new Response(
+      JSON.stringify({ success: true }),
+      { 
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
   } catch (err) {
-    return Response.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
+    return new Response(
+      JSON.stringify({ error: 'Internal Server Error' }),
+      { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      }
     );
   }
 } 
